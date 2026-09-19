@@ -54,4 +54,39 @@ public class EmpleadoDAO {
             return false;
         }
     }
+ // Método para actualizar un empleado existente
+    public boolean actualizar(Empleado emp) {
+        String sql = "UPDATE empleados SET nombre=?, departamento=?, salario=?, fecha_contratacion=?, activo=? WHERE id=?";
+        
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, emp.getNombre());
+            stmt.setString(2, emp.getDepartamento());
+            stmt.setDouble(3, emp.getSalario());
+            stmt.setDate(4, Date.valueOf(emp.getFechaContratacion()));
+            stmt.setBoolean(5, emp.isActivo());
+            stmt.setInt(6, emp.getId()); // El ID va al final para el WHERE
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar empleado: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Método para eliminar un empleado por su ID
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM empleados WHERE id=?";
+        
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar empleado: " + e.getMessage());
+            return false;
+        }
+    }
 }
