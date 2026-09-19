@@ -18,6 +18,9 @@ public class VentanaEmpleados extends JFrame {
     // Componentes del formulario
     private JTextField txtId, txtNombre, txtDepartamento, txtSalario, txtFecha;
     private JCheckBox chkActivo;
+    private JComboBox<String> cbTipoContrato; // 1. Componente de Mejora #4
+    private static final String[] OPCIONES_CONTRATO = {"Permanente", "Temporal", "Por hora"};
+    
     private JButton btnGuardar, btnActualizar, btnEliminar, btnLimpiar;
 
     public VentanaEmpleados() {
@@ -29,7 +32,7 @@ public class VentanaEmpleados extends JFrame {
 
     private void configurarVentana() {
         setTitle("Sistema de Gestión de Empleados - CRUD Completo");
-        setSize(850, 500);
+        setSize(850, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
     }
@@ -38,7 +41,8 @@ public class VentanaEmpleados extends JFrame {
         setLayout(new BorderLayout());
 
         // --- PANEL SUPERIOR: FORMULARIO ---
-        JPanel panelFormulario = new JPanel(new GridLayout(3, 4, 10, 10));
+        // Se usa GridLayout con 0 filas para adaptarse automáticamente
+        JPanel panelFormulario = new JPanel(new GridLayout(0, 4, 10, 10));
         panelFormulario.setBorder(BorderFactory.createTitledBorder("Gestión de Datos"));
 
         panelFormulario.add(new JLabel("ID (Automático):"));
@@ -67,10 +71,16 @@ public class VentanaEmpleados extends JFrame {
         chkActivo.setSelected(true);
         panelFormulario.add(chkActivo);
 
+        // 2. Agregar el JComboBox al formulario
+        panelFormulario.add(new JLabel("Tipo Contrato:"));
+        cbTipoContrato = new JComboBox<>(OPCIONES_CONTRATO);
+        panelFormulario.add(cbTipoContrato);
+
         add(panelFormulario, BorderLayout.NORTH);
 
         // --- PANEL CENTRAL: TABLA ---
-        String[] columnas = {"ID", "Nombre", "Departamento", "Salario", "Contratación", "Activo"};
+        // 3. Columna "Tipo Contrato" agregada a la tabla
+        String[] columnas = {"ID", "Nombre", "Departamento", "Salario", "Contratación", "Activo", "Tipo Contrato"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaEmpleados = new JTable(modeloTabla);
         
@@ -107,9 +117,11 @@ public class VentanaEmpleados extends JFrame {
         modeloTabla.setRowCount(0);
         List<Empleado> empleados = dao.obtenerTodos();
         for (Empleado emp : empleados) {
+            // 4. Se envía tipoContrato al arreglo de la fila
             Object[] fila = {
                     emp.getId(), emp.getNombre(), emp.getDepartamento(), 
-                    emp.getSalario(), emp.getFechaContratacion(), emp.isActivo() ? "Sí" : "No"
+                    emp.getSalario(), emp.getFechaContratacion(), emp.isActivo() ? "Sí" : "No",
+                    emp.getTipoContrato()
             };
             modeloTabla.addRow(fila);
         }
@@ -123,6 +135,8 @@ public class VentanaEmpleados extends JFrame {
         txtSalario.setText(modeloTabla.getValueAt(fila, 3).toString());
         txtFecha.setText(modeloTabla.getValueAt(fila, 4).toString());
         chkActivo.setSelected(modeloTabla.getValueAt(fila, 5).toString().equals("Sí"));
+        // 5. Cargar valor en el JComboBox
+        cbTipoContrato.setSelectedItem(modeloTabla.getValueAt(fila, 6).toString());
     }
 
     private void limpiarFormulario() {
@@ -132,20 +146,22 @@ public class VentanaEmpleados extends JFrame {
         txtSalario.setText("");
         txtFecha.setText(LocalDate.now().toString());
         chkActivo.setSelected(true);
+        cbTipoContrato.setSelectedIndex(0); // 6. Resetear JComboBox
         tablaEmpleados.clearSelection();
     }
 
     private void guardarEmpleado() {
-        // Validación para evitar campos vacíos
         if (txtNombre.getText().trim().isEmpty() || txtDepartamento.getText().trim().isEmpty() || txtSalario.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "El Nombre, Departamento y Salario son obligatorios.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return; // Detiene el guardado
+            return;
         }
 
         try {
+            // 7. Se pasa el valor seleccionado del JComboBox
             Empleado emp = new Empleado(
                     txtNombre.getText(), txtDepartamento.getText(), 
-                    Double.parseDouble(txtSalario.getText()), LocalDate.parse(txtFecha.getText()), chkActivo.isSelected()
+                    Double.parseDouble(txtSalario.getText()), LocalDate.parse(txtFecha.getText()), 
+                    chkActivo.isSelected(), cbTipoContrato.getSelectedItem().toString()
             );
             if (dao.guardar(emp)) {
                 JOptionPane.showMessageDialog(this, "Empleado guardado exitosamente.");
@@ -163,16 +179,17 @@ public class VentanaEmpleados extends JFrame {
             return;
         }
         
-        // Validación para evitar campos vacíos
         if (txtNombre.getText().trim().isEmpty() || txtDepartamento.getText().trim().isEmpty() || txtSalario.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "El Nombre, Departamento y Salario son obligatorios.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return; 
         }
         
         try {
+            // 7. Se pasa el valor seleccionado del JComboBox en la edición
             Empleado emp = new Empleado(
                     Integer.parseInt(txtId.getText()), txtNombre.getText(), txtDepartamento.getText(),
-                    Double.parseDouble(txtSalario.getText()), LocalDate.parse(txtFecha.getText()), chkActivo.isSelected()
+                    Double.parseDouble(txtSalario.getText()), LocalDate.parse(txtFecha.getText()), 
+                    chkActivo.isSelected(), cbTipoContrato.getSelectedItem().toString()
             );
             if (dao.actualizar(emp)) {
                 JOptionPane.showMessageDialog(this, "Empleado actualizado.");
