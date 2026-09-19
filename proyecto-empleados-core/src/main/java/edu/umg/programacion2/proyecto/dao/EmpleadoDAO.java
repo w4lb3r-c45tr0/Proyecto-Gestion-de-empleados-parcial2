@@ -13,7 +13,7 @@ public class EmpleadoDAO {
     // Método para obtener todos los empleados de la base de datos
     public List<Empleado> obtenerTodos() {
         List<Empleado> lista = new ArrayList<>();
-        String sql = "SELECT id, nombre, departamento, salario, fecha_contratacion, activo FROM empleados";
+        String sql = "SELECT id, nombre, departamento, salario, fecha_contratacion, activo, tipo_contrato FROM empleados";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -26,8 +26,9 @@ public class EmpleadoDAO {
                 double salario = rs.getDouble("salario");
                 LocalDate fecha = rs.getDate("fecha_contratacion").toLocalDate();
                 boolean activo = rs.getBoolean("activo");
+                String tipoContrato = rs.getString("tipo_contrato");
 
-                lista.add(new Empleado(id, nombre, departamento, salario, fecha, activo));
+                lista.add(new Empleado(id, nombre, departamento, salario, fecha, activo, tipoContrato));
             }
         } catch (SQLException e) {
             System.err.println("Error al listar empleados: " + e.getMessage());
@@ -37,7 +38,7 @@ public class EmpleadoDAO {
 
     // Método para insertar un nuevo empleado
     public boolean guardar(Empleado emp) {
-        String sql = "INSERT INTO empleados (nombre, departamento, salario, fecha_contratacion, activo) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO empleados (nombre, departamento, salario, fecha_contratacion, activo, tipo_contrato) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -47,6 +48,7 @@ public class EmpleadoDAO {
             stmt.setDouble(3, emp.getSalario());
             stmt.setDate(4, Date.valueOf(emp.getFechaContratacion()));
             stmt.setBoolean(5, emp.isActivo());
+            stmt.setString(6, emp.getTipoContrato());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -56,7 +58,7 @@ public class EmpleadoDAO {
     }
  // Método para actualizar un empleado existente
     public boolean actualizar(Empleado emp) {
-        String sql = "UPDATE empleados SET nombre=?, departamento=?, salario=?, fecha_contratacion=?, activo=? WHERE id=?";
+        String sql = "UPDATE empleados SET nombre=?, departamento=?, salario=?, fecha_contratacion=?, activo=?, tipo_contrato=? WHERE id=?";
         
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -66,7 +68,9 @@ public class EmpleadoDAO {
             stmt.setDouble(3, emp.getSalario());
             stmt.setDate(4, Date.valueOf(emp.getFechaContratacion()));
             stmt.setBoolean(5, emp.isActivo());
-            stmt.setInt(6, emp.getId()); // El ID va al final para el WHERE
+            stmt.setString(6, emp.getTipoContrato());
+            stmt.setInt(7, emp.getId()); // El ID va al final para el WHERE
+            
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
