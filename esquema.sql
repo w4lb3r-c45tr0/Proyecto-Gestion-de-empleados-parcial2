@@ -13,3 +13,8 @@ CREATE TABLE empleados (
 -- Datos de prueba iniciales para empezar a programar
 INSERT INTO empleados (nombre, departamento, salario, fecha_contratacion, activo) 
 VALUES ('Ana Lucía Pérez', 'Sistemas', 8500.00, '2024-03-15', TRUE);
+
+--MEJORAS--
+
+use gestion_empleados_db;
+alter table empleados ADD column tipo_contrato varchar(20) Not null default 'permanente';
