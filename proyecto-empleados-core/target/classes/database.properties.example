@@ -1,0 +1,6 @@
+# INSTRUCCIONES: Renombra este archivo a database.properties y coloca tus credenciales reales.
+# ATENCIÓN: Nunca subas el archivo database.properties real a GitHub, ya está ignorado en el .gitignore.
+
+db.url=jdbc:mysql://localhost:3306/nombre_de_tu_base_de_datos?useSSL=false&serverTimezone=UTC
+db.user=root
+db.password=TU_CONTRASEÑA_AQUI

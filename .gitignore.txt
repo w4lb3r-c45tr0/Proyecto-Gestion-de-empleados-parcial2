@@ -8,3 +8,6 @@
 target/
 *.jar
 *.class
+
+# Ignorar credenciales locales de base de datos
+database.properties
